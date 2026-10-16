@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Domain model and business rules. No NuGet dependencies, no database code:
+       everything here is plain C# and can be unit-tested in isolation. -->
+  <PropertyGroup>
+    <RootNamespace>ImpiantiTracker.Core</RootNamespace>
+  </PropertyGroup>
+
+</Project>
