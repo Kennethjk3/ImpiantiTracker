@@ -1,3 +1,5 @@
+using ImpiantiTracker.Core.Maintenance;
+
 namespace ImpiantiTracker.Core.Domain;
 
 public enum InstallationType
@@ -39,6 +41,13 @@ public static class Labels
         VisitKind.EfficiencyCheck => "Efficiency check (RCEE)",
         VisitKind.Repair => "Repair",
         _ => kind.ToString(),
+    };
+
+    public static string Of(MaintenanceStatus status) => status switch
+    {
+        MaintenanceStatus.Overdue => "OVERDUE",
+        MaintenanceStatus.DueSoon => "Due soon",
+        _ => "OK",
     };
 
     /// <summary>

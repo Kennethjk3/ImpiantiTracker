@@ -1,0 +1,50 @@
+# Sample requests. Open in VS Code (REST Client extension) or Rider and click "Send Request".
+# Start the API first: dotnet run --project src/ImpiantiTracker.Api
+
+@api = http://localhost:5080
+
+### Maintenance plan: overdue + due in the next 30 days
+GET {{api}}/api/maintenance
+
+### Everything, with a 60-day window
+GET {{api}}/api/maintenance?days=60&all=true
+
+### Installations in one city
+GET {{api}}/api/installations?city=Catanzaro
+
+### One installation with its history
+GET {{api}}/api/installations/1
+
+### Record a maintenance visit
+POST {{api}}/api/installations/1/visits
+Content-Type: application/json
+
+{
+  "kind": "Maintenance",
+  "technician": "K. Kier",
+  "cost": 140.50,
+  "notes": "Annual service, filters replaced"
+}
+
+### A visit that fails validation (future date, negative cost)
+POST {{api}}/api/installations/1/visits
+Content-Type: application/json
+
+{
+  "date": "2030-01-01",
+  "kind": "Repair",
+  "technician": "K. Kier",
+  "cost": -5
+}
+
+### Yearly report
+GET {{api}}/api/reports/2026
+
+### CSV for Excel
+GET {{api}}/api/maintenance/export?all=true
+
+### Health
+GET {{api}}/health
+
+### OpenAPI description
+GET {{api}}/openapi/v1.json

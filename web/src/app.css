@@ -1,0 +1,441 @@
+/*
+  Impianti design tokens.
+  Galvanized-steel greys and graphite ink; colour only carries meaning:
+  hot = overdue, warm = due soon, cool = fine (and links).
+  One typeface, Archivo, with its width axis doing the work: condensed for dense
+  data, normal for reading, expanded for the dates that matter.
+*/
+
+:root {
+	--paper: #eceff1;
+	--surface: #ffffff;
+	--ink: #17232b;
+	--ink-2: #4a5963;
+	--ink-3: #5c6973;
+	--rule: #cbd3d9;
+	--rule-strong: #95a2ab;
+
+	--hot: #b93216;
+	--hot-mark: #d9431f;
+	--hot-tint: #fbe3dc;
+	--warm: #8a5600;
+	--warm-mark: #e8a317;
+	--warm-tint: #fbefd3;
+	--cool: #1e5c86;
+	--cool-mark: #2f7db3;
+	--cool-tint: #dcebf5;
+
+	--focus: #1e5c86;
+
+	--font: 'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--condensed: 78%;
+	--expanded: 118%;
+
+	/* Type scale, ratio 1.25 from 16px */
+	--step--1: 0.8125rem;
+	--step-0: 1rem;
+	--step-1: 1.25rem;
+	--step-2: 1.5625rem;
+	--step-3: 1.953rem;
+	--step-4: 2.441rem;
+
+	--space-1: 0.25rem;
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
+	--space-5: 1.5rem;
+	--space-6: 2rem;
+	--space-7: 3rem;
+
+	--radius: 4px;
+	--page: 72rem;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--paper: #121c23;
+		--surface: #1a2630;
+		--ink: #e6ecef;
+		--ink-2: #aab7bf;
+		--ink-3: #93a1aa;
+		--rule: #2e3c47;
+		--rule-strong: #4f606c;
+
+		--hot: #ff8f73;
+		--hot-mark: #e8573a;
+		--hot-tint: #3b221b;
+		--warm: #f2c062;
+		--warm-mark: #e8a317;
+		--warm-tint: #3a2f16;
+		--cool: #84bde6;
+		--cool-mark: #4c9ad0;
+		--cool-tint: #193242;
+
+		--focus: #84bde6;
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--font);
+	font-size: var(--step-0);
+	line-height: 1.5;
+	font-variant-numeric: tabular-nums;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+	margin: 0;
+	line-height: 1.15;
+	font-stretch: var(--condensed);
+	font-weight: 700;
+	letter-spacing: -0.005em;
+}
+
+h1 {
+	font-size: var(--step-4);
+}
+
+h2 {
+	font-size: var(--step-2);
+}
+
+h3 {
+	font-size: var(--step-1);
+}
+
+p {
+	margin: 0;
+	max-width: 68ch;
+}
+
+a {
+	color: var(--cool);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.18em;
+}
+
+a:hover {
+	text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+	outline: 3px solid var(--focus);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.muted {
+	color: var(--ink-2);
+}
+
+.small {
+	font-size: var(--step--1);
+}
+
+/* ---------- Page frame ---------- */
+
+.page {
+	width: min(100% - 2rem, var(--page));
+	margin-inline: auto;
+	padding-block: var(--space-6) var(--space-7);
+}
+
+.page-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: end;
+	justify-content: space-between;
+	gap: var(--space-4) var(--space-6);
+	margin-bottom: var(--space-5);
+}
+
+.page-head > div {
+	display: grid;
+	gap: var(--space-2);
+}
+
+.section {
+	margin-top: var(--space-7);
+}
+
+.section-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--space-2) var(--space-5);
+	margin-bottom: var(--space-3);
+}
+
+.panel {
+	background: var(--surface);
+	border: 1px solid var(--rule);
+	border-radius: var(--radius);
+}
+
+/* ---------- Buttons and links that act like buttons ---------- */
+
+.button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	min-height: 2.75rem;
+	padding: 0 var(--space-4);
+	border: 1px solid var(--rule-strong);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--ink);
+	font: inherit;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.button:hover {
+	border-color: var(--ink-2);
+}
+
+.button.primary {
+	background: var(--cool);
+	border-color: var(--cool);
+	color: var(--surface);
+}
+
+.button.primary:hover {
+	filter: brightness(1.08);
+}
+
+.button:disabled {
+	opacity: 0.6;
+	cursor: progress;
+}
+
+/* ---------- Segmented choice (window, year) ---------- */
+
+.segmented {
+	display: inline-flex;
+	border: 1px solid var(--rule-strong);
+	border-radius: var(--radius);
+	background: var(--surface);
+	overflow: hidden;
+}
+
+.segmented a {
+	min-width: 3.25rem;
+	padding: var(--space-2) var(--space-3);
+	color: var(--ink-2);
+	text-align: center;
+	text-decoration: none;
+	font-weight: 600;
+	font-stretch: var(--condensed);
+}
+
+.segmented a + a {
+	border-left: 1px solid var(--rule);
+}
+
+.segmented a[aria-current='page'] {
+	background: var(--ink);
+	color: var(--paper);
+}
+
+/* ---------- Tables ---------- */
+
+.table-wrap {
+	overflow-x: auto;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--surface);
+}
+
+th,
+td {
+	padding: var(--space-3) var(--space-4);
+	text-align: left;
+	vertical-align: top;
+	border-bottom: 1px solid var(--rule);
+}
+
+thead th {
+	font-size: var(--step--1);
+	font-weight: 600;
+	font-stretch: var(--condensed);
+	color: var(--ink-2);
+	white-space: nowrap;
+	border-bottom-color: var(--rule-strong);
+}
+
+tbody tr:last-child td {
+	border-bottom: none;
+}
+
+td.num,
+th.num {
+	text-align: right;
+}
+
+.nowrap {
+	white-space: nowrap;
+}
+
+/*
+  On a phone, table rows become stacked blocks: each cell shows its column name
+  (from data-label) so nothing has to scroll sideways.
+*/
+@media (max-width: 44rem) {
+	table.stack thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+	}
+
+	table.stack,
+	table.stack tbody,
+	table.stack tr,
+	table.stack td {
+		display: block;
+	}
+
+	table.stack tr {
+		padding: var(--space-3) var(--space-4);
+		border-bottom: 1px solid var(--rule);
+	}
+
+	table.stack tbody tr:last-child {
+		border-bottom: none;
+	}
+
+	table.stack td {
+		display: grid;
+		grid-template-columns: 6.5rem 1fr;
+		gap: var(--space-3);
+		padding: 0.15rem 0;
+		border: none;
+		text-align: left;
+	}
+
+	table.stack td::before {
+		content: attr(data-label);
+		color: var(--ink-2);
+		font-size: var(--step--1);
+		font-stretch: var(--condensed);
+		font-weight: 600;
+		padding-top: 0.15em;
+	}
+
+	table.stack td.lead {
+		display: block;
+		font-size: var(--step-1);
+	}
+
+	table.stack td.lead::before {
+		content: none;
+	}
+}
+
+/* ---------- Forms ---------- */
+
+.field {
+	display: grid;
+	gap: var(--space-1);
+}
+
+.field label,
+.field .label {
+	font-weight: 600;
+	font-stretch: var(--condensed);
+}
+
+.field .hint {
+	color: var(--ink-2);
+	font-size: var(--step--1);
+}
+
+input,
+select,
+textarea {
+	width: 100%;
+	min-height: 2.75rem;
+	padding: var(--space-2) var(--space-3);
+	border: 1px solid var(--rule-strong);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--ink);
+	font: inherit;
+}
+
+textarea {
+	min-height: 5.5rem;
+	resize: vertical;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+	outline: 3px solid var(--focus);
+	outline-offset: 0;
+	border-color: var(--focus);
+}
+
+/* ---------- Messages ---------- */
+
+.notice {
+	padding: var(--space-3) var(--space-4);
+	border-left: 4px solid;
+	border-radius: var(--radius);
+}
+
+.notice.error {
+	background: var(--hot-tint);
+	border-color: var(--hot-mark);
+}
+
+.notice.success {
+	background: var(--cool-tint);
+	border-color: var(--cool-mark);
+}
+
+.notice ul {
+	margin: var(--space-2) 0 0;
+	padding-left: 1.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}

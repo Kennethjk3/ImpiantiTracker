@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- HTTP API over the same TrackerService the CLI uses. The SvelteKit app in /web calls it. -->
+  <PropertyGroup>
+    <RootNamespace>ImpiantiTracker.Api</RootNamespace>
+    <!-- "dotnet run" from any folder runs in this project's folder, so appsettings.json is found
+         and the SQLite path "../../impianti.db" is the same file the CLI uses from the repo root. -->
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ImpiantiTracker.Data\ImpiantiTracker.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+  </ItemGroup>
+
+</Project>

@@ -17,11 +17,15 @@ public sealed record InstallationRow(
     DateOnly InstalledOn,
     DateOnly? LastVisit);
 
-public sealed record AddVisitResult(bool Success, int? VisitId, IReadOnlyList<string> Errors)
+/// <summary>An installation with its customer, its visit history (newest first) and where it stands on maintenance.</summary>
+public sealed record InstallationDetail(Installation Installation, DueItem Due);
+
+public sealed record AddVisitResult(bool Success, int? VisitId, IReadOnlyList<string> Errors, bool NotFound = false)
 {
     public static AddVisitResult Saved(int visitId) => new(true, visitId, []);
     public static AddVisitResult Failed(IReadOnlyList<string> errors) => new(false, null, errors);
-    public static AddVisitResult Failed(string error) => new(false, null, [error]);
+    public static AddVisitResult Missing(int installationId) =>
+        new(false, null, [$"Installation {installationId} does not exist."], NotFound: true);
 }
 
 /// <summary>Everything the application does with the database. Reads use AsNoTracking and project only the columns they need.</summary>
@@ -55,6 +59,32 @@ public sealed class TrackerService(AppDbContext db)
             .FirstOrDefaultAsync(i => i.Id == id, ct);
 
     /// <summary>
+    /// The installation plus its maintenance status, worked out from the history already loaded
+    /// with the same rule the plan uses. Null if the installation doesn't exist.
+    /// </summary>
+    public async Task<InstallationDetail?> GetInstallationDetailAsync(
+        int id, DateOnly today, int warningDays, CancellationToken ct = default)
+    {
+        var installation = await GetInstallationAsync(id, ct);
+        if (installation is null)
+            return null;
+
+        var customer = installation.Customer!;
+        var lastService = installation.Visits
+            .Where(v => MaintenanceSchedule.CountsAsService(v.Kind))
+            .Select(v => (DateOnly?)v.Date)
+            .Max();
+
+        var due = MaintenanceSchedule.Evaluate(
+            new InstallationSnapshot(installation.Id, customer.Name, customer.City, customer.Phone,
+                installation.Type, installation.Brand, installation.InstalledOn,
+                installation.MaintenanceIntervalMonths, lastService),
+            today, warningDays);
+
+        return new InstallationDetail(installation, due);
+    }
+
+    /// <summary>
     /// The maintenance plan. One SQL query fetches each installation with the date of its last
     /// routine service (a correlated subquery); the due-date rules then run in Core.
     /// </summary>
@@ -84,7 +114,7 @@ public sealed class TrackerService(AppDbContext db)
             .FirstOrDefaultAsync(ct);
 
         if (installedOn is null)
-            return AddVisitResult.Failed($"Installation {input.InstallationId} does not exist.");
+            return AddVisitResult.Missing(input.InstallationId);
 
         var errors = VisitRules.Validate(input, installedOn.Value, today);
         if (errors.Count > 0)

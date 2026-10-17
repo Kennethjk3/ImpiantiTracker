@@ -19,6 +19,13 @@ public static class DbSetup
     public static DbContextOptions<AppDbContext> BuildOptions(DatabaseProvider provider, string connectionString)
     {
         var builder = new DbContextOptionsBuilder<AppDbContext>();
+        Configure(builder, provider, connectionString);
+        return builder.Options;
+    }
+
+    /// <summary>Points EF Core at the chosen database. Used directly by the CLI and through AddDbContext by the API.</summary>
+    public static void Configure(DbContextOptionsBuilder builder, DatabaseProvider provider, string connectionString)
+    {
         switch (provider)
         {
             case DatabaseProvider.SqlServer:
@@ -31,7 +38,6 @@ public static class DbSetup
             default:
                 throw new ArgumentOutOfRangeException(nameof(provider), provider, null);
         }
-        return builder.Options;
     }
 }
 

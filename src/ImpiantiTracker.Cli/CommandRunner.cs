@@ -63,13 +63,14 @@ public sealed class CommandRunner(AppDbContext db, AppSettings settings, DateOnl
         if (args.Positionals.Count == 0 || !int.TryParse(args.Positionals[0], out var id))
             throw new UsageException("Usage: show <installation id>");
 
-        var installation = await _service.GetInstallationAsync(id, ct);
-        if (installation is null)
+        var detail = await _service.GetInstallationDetailAsync(id, today, settings.WarningDays, ct);
+        if (detail is null)
         {
             output.WriteLine($"Installation {id} does not exist.");
             return 1;
         }
 
+        var (installation, plan) = detail;
         var customer = installation.Customer!;
         output.WriteLine($"#{installation.Id}  {Labels.Of(installation.Type)}  {installation.Brand} {installation.Model}".TrimEnd());
         output.WriteLine($"Customer:    {customer.Name}, {customer.Address}, {customer.City}");
@@ -77,18 +78,7 @@ public sealed class CommandRunner(AppDbContext db, AppSettings settings, DateOnl
         output.WriteLine($"Serial:      {installation.SerialNumber ?? "-"}    Power: {Formats.Kw(installation.PowerKw)} kW");
         output.WriteLine($"Installed:   {Formats.Date(installation.InstalledOn)}    Service every {installation.MaintenanceIntervalMonths} months");
         if (installation.RegistryCode is not null) output.WriteLine($"Registry:    {installation.RegistryCode}");
-
-        // The same rule the maintenance plan uses, applied to the history in memory.
-        var lastService = installation.Visits
-            .Where(v => MaintenanceSchedule.CountsAsService(v.Kind))
-            .Select(v => (DateOnly?)v.Date)
-            .Max();
-        var plan = MaintenanceSchedule.Evaluate(
-            new InstallationSnapshot(installation.Id, customer.Name, customer.City, customer.Phone,
-                installation.Type, installation.Brand, installation.InstalledOn,
-                installation.MaintenanceIntervalMonths, lastService),
-            today, settings.WarningDays);
-        output.WriteLine($"Next due:    {Formats.Date(plan.NextDue)} ({StatusLabel(plan.Status)}, {Formats.DaysFromToday(plan.DaysUntilDue)})");
+        output.WriteLine($"Next due:    {Formats.Date(plan.NextDue)} ({Labels.Of(plan.Status)}, {Formats.DaysFromToday(plan.DaysUntilDue)})");
         output.WriteLine();
 
         if (installation.Visits.Count == 0)
@@ -118,7 +108,7 @@ public sealed class CommandRunner(AppDbContext db, AppSettings settings, DateOnl
         TablePrinter.Print(output,
             ["ID", "Status", "Due", "When", "Customer", "City", "Phone", "Type", "Last service"],
             plan.Select(d => TablePrinter.Row(
-                d.InstallationId.ToString(), StatusLabel(d.Status), Formats.Date(d.NextDue),
+                d.InstallationId.ToString(), Labels.Of(d.Status), Formats.Date(d.NextDue),
                 Formats.DaysFromToday(d.DaysUntilDue), d.Customer, d.City, d.Phone ?? "",
                 Labels.Of(d.Type), Formats.Date(d.LastService))).ToList(),
             rowColor: i => plan[i].Status switch
@@ -163,7 +153,7 @@ public sealed class CommandRunner(AppDbContext db, AppSettings settings, DateOnl
 
         var plan = await _service.GetMaintenancePlanAsync(today, settings.WarningDays, includeOk: true, ct);
         if (plan.FirstOrDefault(d => d.InstallationId == visit.InstallationId) is { } item)
-            output.WriteLine($"Next service: {Formats.Date(item.NextDue)} ({StatusLabel(item.Status)}).");
+            output.WriteLine($"Next service: {Formats.Date(item.NextDue)} ({Labels.Of(item.Status)}).");
         return 0;
     }
 
@@ -201,17 +191,7 @@ public sealed class CommandRunner(AppDbContext db, AppSettings settings, DateOnl
 
         await using (var file = new StreamWriter(path, append: false, Csv.ExcelEncoding))
         {
-            await file.WriteLineAsync(Csv.Row(
-                ["ID", "Status", "Due", "DaysUntilDue", "Customer", "City", "Phone", "Type", "Brand", "LastService"]));
-            foreach (var d in plan)
-            {
-                await file.WriteLineAsync(Csv.Row(
-                [
-                    d.InstallationId.ToString(), StatusLabel(d.Status), Formats.Date(d.NextDue), d.DaysUntilDue.ToString(),
-                    d.Customer, d.City, d.Phone, Labels.Of(d.Type), d.Brand,
-                    d.LastService is { } last ? Formats.Date(last) : "",
-                ]));
-            }
+            await MaintenancePlanCsv.WriteAsync(file, plan, ct);
         }
 
         output.WriteLine($"Wrote {plan.Count} row(s) to {path}");
@@ -223,11 +203,4 @@ public sealed class CommandRunner(AppDbContext db, AppSettings settings, DateOnl
         var days = args.GetInt("days", settings.WarningDays);
         return days >= 0 ? days : throw new UsageException("--days cannot be negative.");
     }
-
-    private static string StatusLabel(MaintenanceStatus status) => status switch
-    {
-        MaintenanceStatus.Overdue => "OVERDUE",
-        MaintenanceStatus.DueSoon => "Due soon",
-        _ => "OK",
-    };
 }

@@ -343,3 +343,15 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
+
+# Local SQLite database (created by the CLI and the API) and CSV exports
+*.db
+*.db-shm
+*.db-wal
+/*.csv
+
+# Web app
+node_modules/
+.svelte-kit/
+# The Python template above ignores every lib/ folder; the web app keeps its code in one.
+!web/src/lib/
